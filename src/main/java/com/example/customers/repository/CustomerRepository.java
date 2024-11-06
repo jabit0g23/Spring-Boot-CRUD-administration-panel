@@ -11,24 +11,15 @@ import java.util.List;
 @Repository
 public interface CustomerRepository extends CrudRepository<Customers, Integer> {
 
-    //hibernate, hace solo por detras la función, solo debemos declarar la interfaz
+    // Spring Data JPA crea automáticamente la consulta derivada por nombre de método
     List<Customers> findByEmailOrName(String email, String name);
 
-    // Esto es SQL
-    // SQL va por tablas
-    @Query("SELECT * FROM 'customers' WHERE 'email' LIKE '%gmail%' OR 'name' LIKE '%gmail%';")
-    List<Customers> findByEmailOrName2(String email, String name);
+    // Esto es SQL nativo, corregido. Se debe usar la anotación nativeQuery = true
+    @Query(value = "SELECT * FROM customers WHERE email LIKE %:email% OR name LIKE %:name%", nativeQuery = true)
+    List<Customers> findByEmailOrName2(@Param("email") String email, @Param("name") String name);
 
-    // Esto es HQL (Hibernate)
-    // Similar a SQL, pero HQL no va por tablas
-    // Va por clases, es decir, debemos referenciar a la clase de Customers
-
-    @Query("SELECT c FROM Customers c WHERE email LIKE %:email% OR name LIKE %:name%")
-
-    //Customers c , "c" es la abrebiatura de Customers, es un nombre
-    //:email, busca el email tal cual
-    //%:email% busca los que contengan
-
+    // Esto es HQL (Hibernate), donde se hace referencia a la clase en lugar de la tabla
+    @Query("SELECT c FROM Customers c WHERE c.email LIKE %:email% OR c.name LIKE %:name%")
     List<Customers> findByEmailOrName3(@Param("email") String email, @Param("name") String name);
 
 }
